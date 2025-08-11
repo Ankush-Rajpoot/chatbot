@@ -53,11 +53,11 @@ export const SignUp: React.FC = () => {
             <label htmlFor="displayName" className="block text-sm font-medium text-slate-700 mb-2">
               Display Name
             </label>
-  console.log('SignUp Rendered');
-  console.log('isAuthenticated:', isAuthenticated);
-  console.log('isLoading:', isLoading);
-  console.log('isError:', isError);
-  if (error) console.log('SignUp Error:', error);
+  {/* console.log('SignUp Rendered'); */}
+  {/* console.log('isAuthenticated:', isAuthenticated); */}
+  {/* console.log('isLoading:', isLoading); */}
+  {/* console.log('isError:', isError); */}
+  {/* if (error) console.log('SignUp Error:', error); */}
             <div className="relative">
               <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
               <input
@@ -71,14 +71,14 @@ export const SignUp: React.FC = () => {
               />
             </div>
           </div>
-    console.log('SignUp form submitted', { email, password });
+    {/* console.log('SignUp form submitted', { email, password }); */}
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
               Email Address
-      console.log('signUpEmailPassword result:', result);
+      {/* console.log('signUpEmailPassword result:', result); */}
             </label>
-      console.error('SignUp API error:', err);
+      {/* console.error('SignUp API error:', err); */}
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
               <input

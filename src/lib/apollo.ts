@@ -3,32 +3,35 @@ import { setContext } from '@apollo/client/link/context';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { createClient } from 'graphql-ws';
+import { nhost } from './nhost';
 
 // HTTP link for queries and mutations
 const httpLink = createHttpLink({
-  uri: import.meta.env.VITE_HASURA_GRAPHQL_ENDPOINT || 'https://your-hasura-endpoint.hasura.app/v1/graphql',
+  uri: nhost.graphql.getUrl(),
 });
 
 // WebSocket link for subscriptions
 const wsLink = new GraphQLWsLink(
   createClient({
-    url: import.meta.env.VITE_HASURA_WS_ENDPOINT || 'wss://your-hasura-endpoint.hasura.app/v1/graphql',
-    connectionParams: () => ({
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('nhostAccessToken')}`,
-      },
-    }),
+    url: nhost.graphql.wsUrl,
+    connectionParams: async () => {
+      const accessToken = await nhost.auth.getAccessToken();
+      return {
+        headers: {
+          Authorization: accessToken ? `Bearer ${accessToken}` : '',
+        },
+      };
+    },
   })
 );
 
 // Auth link to add authorization header
-const authLink = setContext((_, { headers }) => {
-  const token = localStorage.getItem('nhostAccessToken');
-  
+const authLink = setContext(async (_, { headers }) => {
+  const accessToken = await nhost.auth.getAccessToken();
   return {
     headers: {
       ...headers,
-      authorization: token ? `Bearer ${token}` : '',
+      Authorization: accessToken ? `Bearer ${accessToken}` : '',
     },
   };
 });

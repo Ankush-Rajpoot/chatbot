@@ -10,7 +10,7 @@ import { SignIn } from './components/auth/SignIn';
 import { SignUp } from './components/auth/SignUp';
 
 function App() {
-  console.log('App Rendered');
+  // console.log('App Rendered');
   return (
     <NhostProvider nhost={nhost}>
       <ApolloProvider client={apolloClient}>
@@ -23,7 +23,7 @@ function App() {
                 path="/"
                 element={
                   <AuthGuard>
-                    {console.log('AuthGuard triggered for / route')}
+                    {/* {console.log('AuthGuard triggered for / route')} */}
                     <AppLayout />
                   </AuthGuard>
                 }

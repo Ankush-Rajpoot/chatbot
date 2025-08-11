@@ -12,10 +12,12 @@ export const AppLayout: React.FC = () => {
   const [createChat] = useMutation(CREATE_CHAT);
 
   const handleSelectChat = (chat: Chat) => {
+    console.log('[AppLayout] Selected chat:', chat);
     setSelectedChat(chat);
   };
 
   const handleCreateChat = async () => {
+    console.log('[AppLayout] Creating new chat...');
     try {
       const { data } = await createChat({
         variables: {
@@ -25,13 +27,15 @@ export const AppLayout: React.FC = () => {
       });
 
       if (data?.insert_chats_one) {
+        console.log('[AppLayout] New chat created:', data.insert_chats_one);
         setSelectedChat(data.insert_chats_one);
       }
     } catch (error) {
-      console.error('Error creating chat:', error);
+      console.error('[AppLayout] Error creating chat:', error);
     }
   };
 
+  console.log('[AppLayout] Rendering layout...');
   return (
     <div className="h-screen flex flex-col bg-slate-100">
       <AppHeader />

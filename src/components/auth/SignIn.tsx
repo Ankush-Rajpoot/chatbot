@@ -11,25 +11,25 @@ export const SignIn: React.FC = () => {
   const { signInEmailPassword, isLoading, isError, error } = useSignInEmailPassword();
   const { isAuthenticated } = useAuthenticationStatus();
 
-  console.log('SignIn Rendered');
-  console.log('isAuthenticated:', isAuthenticated);
-  console.log('isLoading:', isLoading);
-  console.log('isError:', isError);
-  if (error) console.log('SignIn Error:', error);
+  // console.log('SignIn Rendered');
+  // console.log('isAuthenticated:', isAuthenticated);
+  // console.log('isLoading:', isLoading);
+  // console.log('isError:', isError);
+  // if (error) console.log('SignIn Error:', error);
 
   if (isAuthenticated) {
-    console.log('User is authenticated, redirecting to /');
+    // console.log('User is authenticated, redirecting to /');
     return <Navigate to="/" replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('SignIn form submitted', { email, password });
+    // console.log('SignIn form submitted', { email, password });
     try {
       const result = await signInEmailPassword(email, password);
-      console.log('signInEmailPassword result:', result);
+      // console.log('signInEmailPassword result:', result);
     } catch (err) {
-      console.error('SignIn API error:', err);
+      // console.error('SignIn API error:', err);
     }
   };
 

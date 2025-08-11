@@ -19,11 +19,23 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ chat }) => {
   const { data: messagesData, loading } = useQuery(GET_MESSAGES, {
     variables: { chatId: chat?.id },
     skip: !chat?.id,
+    onCompleted: (data) => {
+      console.log('[ChatArea] Messages loaded:', data);
+    },
+    onError: (error) => {
+      console.error('[ChatArea] Error loading messages:', error);
+    },
   });
 
   const { data: subscriptionData } = useSubscription(MESSAGES_SUBSCRIPTION, {
     variables: { chatId: chat?.id },
     skip: !chat?.id,
+    onSubscriptionData: ({ subscriptionData }) => {
+      console.log('[ChatArea] Subscription update:', subscriptionData.data);
+    },
+    onError: (error) => {
+      console.error('[ChatArea] Subscription error:', error);
+    },
   });
 
   const [createMessage] = useMutation(CREATE_MESSAGE);
@@ -37,30 +49,34 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ chat }) => {
 
   useEffect(() => {
     scrollToBottom();
+    console.log('[ChatArea] Scrolled to bottom. Messages:', messages);
   }, [messages]);
 
   const handleSendMessage = async (content: string) => {
     if (!chat) return;
+    console.log('[ChatArea] Sending message:', content);
 
     try {
       // First, create the user message
-      await createMessage({
+      const userMsgRes = await createMessage({
         variables: {
           chatId: chat.id,
           content,
           isBot: false,
         },
       });
+      console.log('[ChatArea] User message saved:', userMsgRes);
 
       // Then trigger the chatbot via Hasura Action
-      await sendMessageAction({
+      const botRes = await sendMessageAction({
         variables: {
           chatId: chat.id,
           message: content,
         },
       });
+      console.log('[ChatArea] Bot action triggered:', botRes);
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('[ChatArea] Error sending message:', error);
       // Show error message or toast here
     }
   };

@@ -16,7 +16,14 @@ export const ChatList: React.FC<ChatListProps> = ({
   onCreateChat,
   selectedChatId,
 }) => {
-  const { data, loading, error } = useQuery(GET_CHATS);
+  const { data, loading, error } = useQuery(GET_CHATS, {
+    onCompleted: (data) => {
+      console.log('[ChatList] Chats loaded:', data);
+    },
+    onError: (error) => {
+      console.error('[ChatList] Error loading chats:', error);
+    },
+  });
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -33,6 +40,7 @@ export const ChatList: React.FC<ChatListProps> = ({
   };
 
   if (loading) {
+    console.log('[ChatList] Loading chats...');
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
@@ -41,6 +49,7 @@ export const ChatList: React.FC<ChatListProps> = ({
   }
 
   if (error) {
+    console.error('[ChatList] Error loading chats:', error);
     return (
       <div className="flex items-center justify-center h-64 text-red-600">
         <p>Error loading chats</p>
@@ -49,6 +58,7 @@ export const ChatList: React.FC<ChatListProps> = ({
   }
 
   const chats = data?.chats || [];
+  console.log('[ChatList] Rendered chats:', chats);
 
   return (
     <div className="flex flex-col h-full">

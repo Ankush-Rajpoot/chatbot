@@ -21,11 +21,15 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     if (!message.trim() || disabled || isLoading) return;
 
     const messageText = message.trim();
+    console.log('[MessageInput] Submitting message:', messageText);
     setMessage('');
     setIsLoading(true);
 
     try {
       await onSendMessage(messageText);
+      console.log('[MessageInput] Message sent successfully');
+    } catch (error) {
+      console.error('[MessageInput] Error sending message:', error);
     } finally {
       setIsLoading(false);
     }
@@ -34,6 +38,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
+      console.log('[MessageInput] Enter pressed, submitting message');
       handleSubmit(e);
     }
   };
@@ -44,7 +49,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         <div className="flex-1 relative">
           <textarea
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={(e) => {
+              setMessage(e.target.value);
+              console.log('[MessageInput] Message input changed:', e.target.value);
+            }}
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
             disabled={disabled || isLoading}
@@ -58,6 +66,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               const target = e.target as HTMLTextAreaElement;
               target.style.height = '48px';
               target.style.height = target.scrollHeight + 'px';
+              console.log('[MessageInput] Textarea resized:', target.style.height);
             }}
           />
           
