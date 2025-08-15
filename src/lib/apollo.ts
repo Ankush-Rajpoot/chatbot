@@ -8,6 +8,8 @@ import { nhost } from './nhost';
 // HTTP link for queries and mutations
 const httpLink = createHttpLink({
   uri: nhost.graphql.getUrl(),
+  // Disable automatic persisted queries
+  useGETForQueries: false,
 });
 
 // WebSocket link for subscriptions
@@ -64,4 +66,15 @@ export const apolloClient = new ApolloClient({
       },
     },
   }),
+  // Disable automatic persisted queries to prevent "PersistedQueryNotSupported" error
+  defaultOptions: {
+    watchQuery: {
+      errorPolicy: 'all',
+    },
+    query: {
+      errorPolicy: 'all',
+    },
+  },
+  // Explicitly disable persisted queries
+  ssrMode: false,
 });

@@ -1,0 +1,171 @@
+{
+  "name": "Chatbot Workflow - JavaScript Fixed",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chatbot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "your-webhook-id"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition1",
+              "leftValue": "={{ $json.body.session_variables['x-hasura-user-id'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "validate-user",
+      "name": "Validate User",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "HTTP-Referer",
+              "value": "https://your-app-domain.com"
+            },
+            {
+              "name": "X-Title",
+              "value": "Chatbot App"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"model\": \"openai/gpt-3.5-turbo\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a helpful AI assistant. Be concise and friendly in your responses.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $('Webhook Trigger').item.json.body.input.message }}\"\n    }\n  ],\n  \"max_tokens\": 150,\n  \"temperature\": 0.7\n}",
+        "options": {}
+      },
+      "id": "call-openrouter",
+      "name": "Call OpenRouter AI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract the AI response and save to database\nconst openRouterResponse = $input.first().json;\nconst webhookData = $('Webhook Trigger').first().json;\n\nconsole.log('OpenRouter Response:', JSON.stringify(openRouterResponse));\nconsole.log('Webhook Data:', JSON.stringify(webhookData));\n\n// Extract AI content (handle both array and object responses)\nlet aiContent;\nif (Array.isArray(openRouterResponse)) {\n  aiContent = openRouterResponse[0]?.choices?.[0]?.message?.content;\n} else {\n  aiContent = openRouterResponse?.choices?.[0]?.message?.content;\n}\n\nconst chatId = webhookData.body.input.chat_id;\nconst userMessage = webhookData.body.input.message;\n\nconsole.log('Extracted AI Content:', aiContent);\nconsole.log('Chat ID:', chatId);\n\nif (!aiContent) {\n  throw new Error('Failed to extract AI content from OpenRouter response');\n}\n\n// Save to database\nconst graphqlQuery = {\n  query: `mutation InsertBotMessage($chatId: uuid!, $content: String!) { \n    insert_messages_one(object: { chat_id: $chatId, content: $content, is_bot: true }) { \n      id \n    } \n  }`,\n  variables: {\n    chatId: chatId,\n    content: aiContent\n  }\n};\n\nconsole.log('GraphQL Query:', JSON.stringify(graphqlQuery));\n\n// Make the GraphQL request\nconst dbResponse = await fetch('https://wertssqowjrkykmeovsg.hasura.ap-south-1.nhost.run/v1/graphql', {\n  method: 'POST',\n  headers: {\n    'Content-Type': 'application/json',\n    'x-hasura-admin-secret': 'Hq=1ILX8*V%Df8PlCyljd*BVys-::p,A'\n  },\n  body: JSON.stringify(graphqlQuery)\n});\n\nconst dbResult = await dbResponse.json();\nconsole.log('Database Save Result:', JSON.stringify(dbResult));\n\nif (dbResult.errors) {\n  throw new Error('Failed to save bot message: ' + JSON.stringify(dbResult.errors));\n}\n\n// Return success response\nreturn {\n  success: true,\n  message: 'Response generated successfully',\n  response: aiContent\n};"
+      },
+      "id": "process-and-save",
+      "name": "Process and Save",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "success-response",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": false,\n  \"message\": \"Authentication required: No valid user session\",\n  \"response\": null\n}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "id": "auth-required-response",
+      "name": "Auth Required Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [460, 400]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Validate User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate User": {
+      "main": [
+        [
+          {
+            "node": "Call OpenRouter AI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Auth Required Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call OpenRouter AI": {
+      "main": [
+        [
+          {
+            "node": "Process and Save",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process and Save": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

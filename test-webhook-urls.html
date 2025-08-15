@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check Hasura Action Configuration</title>
+</head>
+<body>
+    <h1>Check Hasura Action Configuration</h1>
+    <p>This will help us see what URL your Hasura Action is currently configured to use.</p>
+    
+    <h3>Steps to update your Hasura Action:</h3>
+    <ol>
+        <li>Open your Hasura Console</li>
+        <li>Go to "Actions" tab</li>
+        <li>Click on the "sendMessage" action</li>
+        <li>Update the webhook URL from:
+            <code style="background: #ffe6e6; padding: 2px 4px;">https://ankushrajpoot.app.n8n.cloud/webhook/chatbot</code>
+        </li>
+        <li>To:
+            <code style="background: #e6ffe6; padding: 2px 4px;">https://ankushrajpoot.app.n8n.cloud/webhook/chatbot-v2</code>
+        </li>
+        <li>Save the changes</li>
+    </ol>
+
+    <h3>Or if you prefer to keep the original URL:</h3>
+    <ol>
+        <li>In n8n, activate a workflow that uses the path "chatbot" (not "chatbot-v2")</li>
+        <li>Make sure that workflow is active (toggle in top-right)</li>
+    </ol>
+
+    <button onclick="testBothUrls()">Test Both Webhook URLs</button>
+    <div id="result"></div>
+
+    <script>
+        async function testBothUrls() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Testing both webhook URLs...';
+            
+            const urls = [
+                'https://ankushrajpoot.app.n8n.cloud/webhook/chatbot',
+                'https://ankushrajpoot.app.n8n.cloud/webhook/chatbot-v2'
+            ];
+            
+            let resultHtml = '<h3>Webhook URL Test Results:</h3>';
+            
+            for (const url of urls) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            body: {
+                                session_variables: {
+                                    'x-hasura-user-id': 'test-user'
+                                },
+                                input: {
+                                    chat_id: '631b4b94-5e56-4960-b7b2-237f11a1034d',
+                                    message: 'Test ping'
+                                }
+                            }
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    resultHtml += `
+                        <div style="border: 1px solid ${response.ok ? 'green' : 'red'}; margin: 10px 0; padding: 10px;">
+                            <h4>${url}</h4>
+                            <p><strong>Status:</strong> ${response.status} ${response.ok ? '✅' : '❌'}</p>
+                            <p><strong>Response:</strong> ${JSON.stringify(data, null, 2)}</p>
+                        </div>
+                    `;
+                } catch (error) {
+                    resultHtml += `
+                        <div style="border: 1px solid red; margin: 10px 0; padding: 10px;">
+                            <h4>${url}</h4>
+                            <p><strong>Status:</strong> ❌ Failed</p>
+                            <p><strong>Error:</strong> ${error.message}</p>
+                        </div>
+                    `;
+                }
+            }
+            
+            result.innerHTML = resultHtml;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Complete Workflow</title>
+</head>
+<body>
+    <h1>Test Complete Workflow</h1>
+    <button onclick="testCompleteFlow()">Test Full Message Flow</button>
+    <div id="result"></div>
+
+    <script>
+        async function testCompleteFlow() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Testing complete workflow...';
+            
+            try {
+                // Test the Hasura Action (which calls n8n)
+                const response = await fetch('https://wertssqowjrkykmeovsg.hasura.ap-south-1.nhost.run/v1/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-hasura-admin-secret': 'Hq=1ILX8*V%Df8PlCyljd*BVys-::p,A'
+                    },
+                    body: JSON.stringify({
+                        query: `
+                        mutation SendMessage($chatId: uuid!, $message: String!) {
+                          sendMessage(chatId: $chatId, message: $message) {
+                            success
+                            message
+                            response
+                          }
+                        }
+                        `,
+                        variables: {
+                            chatId: "631b4b94-5e56-4960-b7b2-237f11a1034d",
+                            message: "Hello, can you introduce yourself?"
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('Hasura Action response:', data);
+                
+                if (data.data && data.data.sendMessage) {
+                    const sendMessageResponse = data.data.sendMessage;
+                    result.innerHTML = `
+                        <div style="border: 1px solid #ccc; padding: 15px; margin: 10px 0;">
+                            <h3>Hasura Action Response:</h3>
+                            <p><strong>Success:</strong> ${sendMessageResponse.success}</p>
+                            <p><strong>Message:</strong> ${sendMessageResponse.message}</p>
+                            <p><strong>AI Response:</strong> ${sendMessageResponse.response}</p>
+                            ${sendMessageResponse.success ? 
+                                '<div style="color: green;">✅ Workflow completed successfully!</div>' : 
+                                '<div style="color: red;">❌ Workflow failed</div>'
+                            }
+                        </div>
+                    `;
+                } else if (data.errors) {
+                    result.innerHTML = `<div style="color: red;">GraphQL Error: ${JSON.stringify(data.errors)}</div>`;
+                } else {
+                    result.innerHTML = `<div style="color: orange;">Unexpected response: ${JSON.stringify(data)}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div style="color: red;">Error: ${error.message}</div>`;
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

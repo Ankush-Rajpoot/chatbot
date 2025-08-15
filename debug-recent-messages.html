@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Recent Messages</title>
+</head>
+<body>
+    <h1>Debug Recent Messages</h1>
+    <button onclick="checkRecentMessages()">Check Recent Messages</button>
+    <div id="result"></div>
+
+    <script>
+        async function checkRecentMessages() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Checking recent messages...';
+            
+            try {
+                const response = await fetch('https://wertssqowjrkykmeovsg.hasura.ap-south-1.nhost.run/v1/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-hasura-admin-secret': 'Hq=1ILX8*V%Df8PlCyljd*BVys-::p,A'
+                    },
+                    body: JSON.stringify({
+                        query: `
+                        query GetRecentMessages {
+                          messages(
+                            order_by: { created_at: desc }
+                            limit: 10
+                          ) {
+                            id
+                            content
+                            is_bot
+                            created_at
+                            chat_id
+                            user_id
+                          }
+                        }
+                        `
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('Recent messages:', data);
+                
+                if (data.data && data.data.messages) {
+                    result.innerHTML = `
+                        <h3>Recent Messages (last 10):</h3>
+                        ${data.data.messages.map(msg => `
+                            <div style="border: 1px solid #ccc; margin: 10px; padding: 10px; background: ${msg.is_bot ? '#e3f2fd' : '#f3e5f5'}">
+                                <strong>ID:</strong> ${msg.id}<br>
+                                <strong>Content:</strong> ${msg.content}<br>
+                                <strong>Is Bot:</strong> ${msg.is_bot}<br>
+                                <strong>Chat ID:</strong> ${msg.chat_id}<br>
+                                <strong>User ID:</strong> ${msg.user_id || 'null'}<br>
+                                <strong>Created:</strong> ${new Date(msg.created_at).toLocaleString()}<br>
+                            </div>
+                        `).join('')}
+                    `;
+                } else if (data.errors) {
+                    result.innerHTML = `<div style="color: red;">Error: ${JSON.stringify(data.errors)}</div>`;
+                } else {
+                    result.innerHTML = `<div style="color: orange;">No messages found</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div style="color: red;">Error: ${error.message}</div>`;
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,5 +1,26 @@
 import { gql } from '@apollo/client';
 
+// Test query to check if GraphQL is working at all
+export const TEST_QUERY = gql`
+  query TestQuery {
+    __schema {
+      types {
+        name
+      }
+    }
+  }
+`;
+
+// Simple test query to verify schema
+export const GET_CHATS_SIMPLE = gql`
+  query GetChatsSimple {
+    chats {
+      id
+      title
+    }
+  }
+`;
+
 export const GET_CHATS = gql`
   query GetChats {
     chats(order_by: { updated_at: desc }) {

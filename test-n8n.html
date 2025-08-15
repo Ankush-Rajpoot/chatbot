@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test n8n Webhook</title>
+</head>
+<body>
+    <h1>Test n8n Webhook Directly</h1>
+    <button onclick="testWebhook()">Test n8n Webhook</button>
+    <div id="result"></div>
+
+    <script>
+        async function testWebhook() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Testing n8n webhook...';
+            
+            try {
+                const response = await fetch('https://ankushrajpoot.app.n8n.cloud/webhook/chatbot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'authorization': 'Bearer dummy-token',
+                        'x-hasura-user-id': 'test-user-123',
+                        'x-hasura-role': 'user'
+                    },
+                    body: JSON.stringify({
+                        input: {
+                            chat_id: "test-chat-id",
+                            message: "Hello from test"
+                        },
+                        session_variables: {
+                            "x-hasura-user-id": "test-user-123",
+                            "x-hasura-role": "user"
+                        }
+                    })
+                });
+                
+                const data = await response.text(); // Get as text first
+                console.log('n8n Response Status:', response.status);
+                console.log('n8n Response Headers:', [...response.headers.entries()]);
+                console.log('n8n Response Body:', data);
+                
+                try {
+                    const jsonData = JSON.parse(data);
+                    result.innerHTML = `
+                        <div style="color: green;">
+                            <h3>✅ n8n Webhook Response:</h3>
+                            <pre>${JSON.stringify(jsonData, null, 2)}</pre>
+                        </div>
+                    `;
+                } catch (parseError) {
+                    result.innerHTML = `
+                        <div style="color: orange;">
+                            <h3>⚠️ n8n Response (Not JSON):</h3>
+                            <p>Status: ${response.status}</p>
+                            <pre>${data}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                result.innerHTML = `
+                    <div style="color: red;">
+                        <h3>❌ Error Testing n8n:</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                console.error('n8n Test Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

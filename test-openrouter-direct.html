@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test OpenRouter Direct</title>
+</head>
+<body>
+    <h1>Test OpenRouter API Direct</h1>
+    <button onclick="testOpenRouter()">Test OpenRouter API</button>
+    <div id="result"></div>
+
+    <script>
+        async function testOpenRouter() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Testing OpenRouter API directly...';
+            
+            try {
+                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer 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',
+                        'Content-Type': 'application/json',
+                        'HTTP-Referer': 'https://your-app-domain.com',
+                        'X-Title': 'Chatbot App'
+                    },
+                    body: JSON.stringify({
+                        model: "openai/gpt-3.5-turbo",
+                        messages: [
+                            {
+                                role: "system",
+                                content: "You are a helpful AI assistant. Be concise and friendly in your responses."
+                            },
+                            {
+                                role: "user",
+                                content: "Hello! Say hi back in one sentence."
+                            }
+                        ],
+                        max_tokens: 150,
+                        temperature: 0.7
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('OpenRouter response:', data);
+                
+                if (response.ok && data.choices && data.choices[0]) {
+                    result.innerHTML = `
+                        <div style="color: green; border: 1px solid green; padding: 10px; margin: 10px 0;">
+                            <h3>✅ OpenRouter API Working!</h3>
+                            <p><strong>AI Response:</strong> ${data.choices[0].message.content}</p>
+                            <p><strong>Model:</strong> ${data.model || 'Unknown'}</p>
+                            <p><strong>Usage:</strong> ${JSON.stringify(data.usage || 'No usage info')}</p>
+                            <p><strong>Full Response Structure:</strong></p>
+                            <pre style="background: #f5f5f5; padding: 10px; overflow: auto;">${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = `
+                        <div style="color: red; border: 1px solid red; padding: 10px; margin: 10px 0;">
+                            <h3>❌ OpenRouter API Failed</h3>
+                            <p><strong>Status:</strong> ${response.status}</p>
+                            <p><strong>Error:</strong> ${data.error?.message || JSON.stringify(data)}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                result.innerHTML = `
+                    <div style="color: red; border: 1px solid red; padding: 10px; margin: 10px 0;">
+                        <h3>❌ Request Failed</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

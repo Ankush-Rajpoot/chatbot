@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
 
 interface MessageInputProps {
   onSendMessage: (message: string) => void;
@@ -44,8 +46,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   return (
-    <div className="border-t border-slate-200 bg-white p-4">
-      <form onSubmit={handleSubmit} className="flex space-x-3">
+    <div className="border-t border-border/50 bg-card/80 backdrop-blur-md p-2.5 sm:p-3">
+      <motion.form 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        onSubmit={handleSubmit} 
+        className="flex space-x-2"
+      >
         <div className="flex-1 relative">
           <textarea
             value={message}
@@ -57,36 +65,66 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             placeholder={placeholder}
             disabled={disabled || isLoading}
             rows={1}
-            className="w-full resize-none rounded-xl border border-slate-300 px-4 py-3 pr-12 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="
+              w-full resize-none rounded-xl border border-input/50 bg-background/80 backdrop-blur-sm
+              px-3 py-2.5 pr-10 
+              text-sm text-foreground placeholder:text-muted-foreground 
+              focus:ring-2 focus:ring-primary/50 focus:border-primary/50 
+              disabled:opacity-50 disabled:cursor-not-allowed 
+              transition-all duration-200 shadow-sm hover:shadow-md
+            "
             style={{
-              minHeight: '48px',
-              maxHeight: '120px',
+              minHeight: '40px',
+              maxHeight: '100px',
             }}
             onInput={(e) => {
               const target = e.target as HTMLTextAreaElement;
-              target.style.height = '48px';
+              target.style.height = '40px';
               target.style.height = target.scrollHeight + 'px';
               console.log('[MessageInput] Textarea resized:', target.style.height);
             }}
           />
           
-          <button
-            type="submit"
-            disabled={!message.trim() || disabled || isLoading}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-          </button>
+            <Button
+              type="submit"
+              disabled={!message.trim() || disabled || isLoading}
+              className="
+                absolute right-1.5 top-1/2 transform -translate-y-1/2 
+                h-7 w-7 p-0 rounded-lg
+                bg-gradient-to-r from-primary to-primary/80 
+                hover:from-primary/90 hover:to-primary/70
+                disabled:opacity-50 transition-all duration-200
+                shadow-lg hover:shadow-xl
+              "
+            >
+              {isLoading ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Send className="h-3.5 w-3.5" />
+              )}
+            </Button>
+          </motion.div>
         </div>
-      </form>
+      </motion.form>
       
-      <div className="mt-2 text-xs text-slate-500 text-center">
-        Press <kbd className="px-1 py-0.5 bg-slate-100 rounded">Enter</kbd> to send, <kbd className="px-1 py-0.5 bg-slate-100 rounded">Shift+Enter</kbd> for new line
-      </div>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="mt-1.5 text-xs text-muted-foreground/70 text-center"
+      >
+        <span className="hidden sm:inline">Press </span>
+        <kbd className="px-1.5 py-0.5 bg-muted/50 rounded text-muted-foreground text-xs font-mono">Enter</kbd>
+        <span className="hidden sm:inline"> to send, </span>
+        <span className="sm:hidden"> send, </span>
+        <kbd className="px-1.5 py-0.5 bg-muted/50 rounded text-muted-foreground text-xs font-mono">Shift+Enter</kbd>
+        <span className="hidden sm:inline"> for new line</span>
+        <span className="sm:hidden"> new line</span>
+      </motion.div>
     </div>
   );
 };

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test n8n Payload Structure</title>
+</head>
+<body>
+    <h1>Test n8n Payload Structure</h1>
+    <button onclick="testPayload()">Test Payload Structure</button>
+    <div id="result"></div>
+
+    <script>
+        async function testPayload() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Testing payload structure...';
+            
+            // This simulates the exact payload structure that n8n receives
+            const testPayload = {
+                "body": {
+                    "action": {
+                        "name": "sendMessage"
+                    },
+                    "input": {
+                        "chat_id": "test-chat-id",
+                        "message": "Test message"
+                    },
+                    "session_variables": {
+                        "x-hasura-role": "user",
+                        "x-hasura-user-id": "test-user-123",
+                        "x-hasura-user-is-anonymous": "false"
+                    }
+                }
+            };
+            
+            console.log('Test payload:', testPayload);
+            
+            // Test the different ways to access the data
+            const tests = {
+                "Direct access to session_variables": testPayload.session_variables,
+                "Body access to session_variables": testPayload.body?.session_variables,
+                "User ID direct": testPayload.session_variables?.['x-hasura-user-id'],
+                "User ID via body": testPayload.body?.session_variables?.['x-hasura-user-id'],
+                "Message direct": testPayload.input?.message,
+                "Message via body": testPayload.body?.input?.message
+            };
+            
+            let resultHtml = '<h3>Payload Structure Test Results:</h3>';
+            
+            for (const [testName, testResult] of Object.entries(tests)) {
+                const status = testResult ? '✅' : '❌';
+                const value = testResult || 'undefined';
+                resultHtml += `
+                    <div style="margin: 5px 0; padding: 5px; background: ${testResult ? '#e8f5e8' : '#ffe8e8'};">
+                        ${status} <strong>${testName}:</strong> ${value}
+                    </div>
+                `;
+            }
+            
+            resultHtml += `
+                <h3>Conclusion:</h3>
+                <div style="padding: 10px; background: #f0f8ff; border: 1px solid #0066cc;">
+                    <strong>The data is accessible via:</strong><br>
+                    • User ID: <code>\$json.body.session_variables['x-hasura-user-id']</code><br>
+                    • Message: <code>\$json.body.input.message</code><br>
+                    • Chat ID: <code>\$json.body.input.chat_id</code>
+                </div>
+            `;
+            
+            result.innerHTML = resultHtml;
+        }
+    </script>
+</body>
+</html>

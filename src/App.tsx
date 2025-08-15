@@ -15,7 +15,7 @@ function App() {
     <NhostProvider nhost={nhost}>
       <ApolloProvider client={apolloClient}>
         <Router>
-          <div className="min-h-screen bg-slate-50">
+          <div className="min-h-screen bg-background text-foreground dark">
             <Routes>
               <Route path="/auth/signin" element={<SignIn />} />
               <Route path="/auth/signup" element={<SignUp />} />
