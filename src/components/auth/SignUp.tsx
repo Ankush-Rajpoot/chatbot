@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useSignUpEmailPassword, useAuthenticationStatus } from '@nhost/react';
-import { Mail, Lock, Eye, EyeOff, MessageCircle, User } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, MessageCircle, User, CheckCircle, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -14,6 +14,7 @@ export const SignUp: React.FC = () => {
   const [displayName, setDisplayName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSignUpSuccessful, setIsSignUpSuccessful] = useState(false);
   const { signUpEmailPassword, isLoading, isError, error } = useSignUpEmailPassword();
   const { isAuthenticated } = useAuthenticationStatus();
 
@@ -28,12 +29,85 @@ export const SignUp: React.FC = () => {
       return;
     }
 
-    await signUpEmailPassword(email, password, {
+    const result = await signUpEmailPassword(email, password, {
       displayName,
     });
+
+    // If signup was successful, show verification message
+    if (result && !result.error) {
+      setIsSignUpSuccessful(true);
+    }
   };
 
   const passwordsMatch = password === confirmPassword || confirmPassword === '';
+
+  // Show verification message after successful signup
+  if (isSignUpSuccessful) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-3">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md"
+        >
+          <Card className="shadow-xl">
+            <CardHeader className="text-center pb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4 mx-auto">
+                <CheckCircle className="h-8 w-8 text-green-600" />
+              </div>
+              <CardTitle className="text-xl font-bold text-green-600">Check Your Email</CardTitle>
+              <CardDescription className="text-base">
+                We've sent a verification link to your email address
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="pt-0 space-y-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p className="text-green-800 text-sm font-medium mb-2">
+                  Verification email sent to:
+                </p>
+                <p className="text-green-700 text-sm font-mono bg-white px-3 py-2 rounded border">
+                  {email}
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-muted-foreground text-sm">
+                  <strong>Next steps:</strong>
+                </p>
+                <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+                  <li>Check your email inbox (and spam folder)</li>
+                  <li>Click the verification link in the email</li>
+                  <li>Return here to sign in to your account</li>
+                </ol>
+              </div>
+
+              <div className="pt-2">
+                <Button
+                  onClick={() => setIsSignUpSuccessful(false)}
+                  variant="outline"
+                  className="w-full h-9"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Sign Up
+                </Button>
+              </div>
+
+              <div className="text-center pt-2">
+                <p className="text-muted-foreground text-sm">
+                  Already verified?{' '}
+                  <Link to="/auth/signin" className="text-primary hover:text-primary/80 font-medium">
+                    Sign in here
+                  </Link>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-3">
