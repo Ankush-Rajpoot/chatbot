@@ -1,10 +1,10 @@
 {
-  "name": "Chatbot Workflow - Simplified with HTTP Nodes",
+  "name": "Chatbot Workflow - Free Models",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "chatbot-v4",
+        "path": "chatbot-free",
         "responseMode": "responseNode",
         "options": {}
       },
@@ -13,7 +13,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
       "position": [240, 300],
-      "webhookId": "your-webhook-id-v4"
+      "webhookId": "your-webhook-id-free"
     },
     {
       "parameters": {
@@ -45,7 +45,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Extract webhook data and prepare OpenRouter request\nconst webhookData = $input.first().json;\nconsole.log('Webhook Data:', JSON.stringify(webhookData, null, 2));\n\nconst userMessage = webhookData.body.input.message;\nconst chatId = webhookData.body.input.chat_id;\nconst userId = webhookData.body.session_variables['x-hasura-user-id'];\n\nconsole.log('User Message:', userMessage);\nconsole.log('Chat ID:', chatId);\nconsole.log('User ID:', userId);\n\n// Prepare OpenRouter API request\nconst openRouterRequest = {\n  model: \"openai/gpt-3.5-turbo\",\n  messages: [\n    {\n      role: \"system\",\n      content: \"You are a helpful AI assistant. Be concise and friendly in your responses.\"\n    },\n    {\n      role: \"user\",\n      content: userMessage\n    }\n  ],\n  max_tokens: 150,\n  temperature: 0.7\n};\n\nconsole.log('OpenRouter Request:', JSON.stringify(openRouterRequest, null, 2));\n\nreturn {\n  openRouterRequest: openRouterRequest,\n  chatId: chatId,\n  userMessage: userMessage,\n  userId: userId\n};"
+        "jsCode": "// Extract webhook data and prepare OpenRouter request\nconst webhookData = $input.first().json;\nconsole.log('Webhook Data:', JSON.stringify(webhookData, null, 2));\n\nconst userMessage = webhookData.body.input.message;\nconst chatId = webhookData.body.input.chat_id;\nconst userId = webhookData.body.session_variables['x-hasura-user-id'];\n\nconsole.log('User Message:', userMessage);\nconsole.log('Chat ID:', chatId);\nconsole.log('User ID:', userId);\n\n// Prepare OpenRouter API request with FREE model\nconst openRouterRequest = {\n  model: \"meta-llama/llama-3.1-8b-instruct:free\",\n  messages: [\n    {\n      role: \"system\",\n      content: \"You are a helpful AI assistant. Be concise and friendly in your responses.\"\n    },\n    {\n      role: \"user\",\n      content: userMessage\n    }\n  ],\n  max_tokens: 150,\n  temperature: 0.7\n};\n\nconsole.log('OpenRouter Request:', JSON.stringify(openRouterRequest, null, 2));\n\nreturn {\n  openRouterRequest: openRouterRequest,\n  chatId: chatId,\n  userMessage: userMessage,\n  userId: userId\n};"
       },
       "id": "prepare-request",
       "name": "Prepare Request",
@@ -70,7 +70,7 @@
             },
             {
               "name": "HTTP-Referer",
-              "value": "https://your-app-domain.com"
+              "value": "https://localhost:5173"
             },
             {
               "name": "X-Title",
