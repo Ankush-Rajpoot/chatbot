@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>OpenRouter API Test</title>
+    <title>Test GPT-3.5 Turbo</title>
 </head>
 <body>
-    <h1>OpenRouter API Test</h1>
-    <button onclick="testAPI()">Test Current API Key</button>
+    <h1>Test GPT-3.5 Turbo</h1>
+    <button onclick="testGPT35()">Test GPT-3.5 Turbo</button>
     <div id="result"></div>
 
     <script>
-        async function testAPI() {
+        async function testGPT35() {
             const result = document.getElementById('result');
-            result.innerHTML = 'Testing...';
+            result.innerHTML = 'Testing GPT-3.5 Turbo...';
             
             try {
                 const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -23,33 +23,42 @@
                         'X-Title': 'Chatbot Test'
                     },
                     body: JSON.stringify({
-                        model: "meta-llama/llama-3.1-8b-instruct:free",
+                        model: "openai/gpt-3.5-turbo",
                         messages: [
                             {
+                                role: "system",
+                                content: "You are a helpful AI assistant. Be concise and friendly in your responses."
+                            },
+                            {
                                 role: "user",
-                                content: "Say hello in one word"
+                                content: "Hello! Say hi back in one sentence."
                             }
                         ],
-                        max_tokens: 10,
+                        max_tokens: 150,
                         temperature: 0.7
                     })
                 });
                 
                 const data = await response.json();
-                console.log('Full response:', data);
+                console.log('GPT-3.5 response:', data);
                 
                 if (response.ok && data.choices && data.choices[0]) {
                     result.innerHTML = `
-                        <div style="color: green; border: 1px solid green; padding: 15px; margin: 10px 0;">
-                            <h3>✅ API KEY WORKS!</h3>
+                        <div style="color: green; border: 2px solid green; padding: 20px; margin: 10px 0;">
+                            <h3>🎉 GPT-3.5 TURBO WORKS!</h3>
                             <p><strong>Response:</strong> ${data.choices[0].message.content}</p>
                             <p><strong>Model:</strong> ${data.model}</p>
+                            <p><strong>Usage:</strong> ${JSON.stringify(data.usage || 'No usage info')}</p>
+                            <div style="background: #f0f8f0; padding: 10px; margin: 10px 0;">
+                                <strong>✅ Your chatbot should now work with GPT-3.5 Turbo!</strong><br>
+                                <strong>Next step:</strong> Update your n8n workflow and test your chatbot.
+                            </div>
                         </div>
                     `;
                 } else {
                     result.innerHTML = `
-                        <div style="color: red; border: 1px solid red; padding: 15px; margin: 10px 0;">
-                            <h3>❌ API KEY FAILED</h3>
+                        <div style="color: red; border: 2px solid red; padding: 20px; margin: 10px 0;">
+                            <h3>❌ GPT-3.5 TURBO FAILED</h3>
                             <p><strong>Status:</strong> ${response.status}</p>
                             <p><strong>Error:</strong> ${data.error?.message || JSON.stringify(data)}</p>
                             <details>
@@ -61,7 +70,7 @@
                 }
             } catch (error) {
                 result.innerHTML = `
-                    <div style="color: red; border: 1px solid red; padding: 15px; margin: 10px 0;">
+                    <div style="color: red; border: 2px solid red; padding: 20px; margin: 10px 0;">
                         <h3>❌ REQUEST FAILED</h3>
                         <p>${error.message}</p>
                     </div>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Updated Webhook</title>
+</head>
+<body>
+    <h1>Test Updated n8n Webhook</h1>
+    <p>This will test if your webhook works with the new API key after you update n8n.</p>
+    <button onclick="testWebhook()">Test Webhook with New API Key</button>
+    <div id="result"></div>
+
+    <script>
+        async function testWebhook() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Testing webhook with new API key...';
+            
+            const payload = {
+                input: {
+                    message: "Hello! Testing with new API key",
+                    chat_id: "test-chat-id-" + Date.now()
+                },
+                session_variables: {
+                    "x-hasura-user-id": "test-user-id"
+                }
+            };
+            
+            try {
+                const response = await fetch('https://ankushrajpoot.app.n8n.cloud/webhook/chatbot-v4', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                console.log('Webhook response:', data);
+                
+                if (response.ok && data.success) {
+                    result.innerHTML = `
+                        <div style="color: green; border: 2px solid green; padding: 20px; margin: 10px 0;">
+                            <h3>🎉 WEBHOOK WORKS WITH NEW API KEY!</h3>
+                            <p><strong>Success:</strong> ${data.success}</p>
+                            <p><strong>Message:</strong> ${data.message}</p>
+                            <p><strong>AI Response:</strong> ${data.response}</p>
+                            <p><strong>✅ Your chatbot should now work!</strong></p>
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = `
+                        <div style="color: red; border: 2px solid red; padding: 20px; margin: 10px 0;">
+                            <h3>❌ WEBHOOK STILL FAILING</h3>
+                            <p><strong>Status:</strong> ${response.status}</p>
+                            <p><strong>Response:</strong> ${JSON.stringify(data)}</p>
+                            <p><strong>Make sure you updated the API key in n8n!</strong></p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                result.innerHTML = `
+                    <div style="color: red; border: 2px solid red; padding: 20px; margin: 10px 0;">
+                        <h3>❌ REQUEST FAILED</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
