@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Link, Navigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, Navigate } from 'react-router-dom';
 import { useSignInEmailPassword, useAuthenticationStatus } from '@nhost/react';
-import { Mail, Lock, Eye, EyeOff, MessageCircle, Info } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -11,20 +11,8 @@ export const SignIn: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [showVerificationBanner, setShowVerificationBanner] = useState(false);
   const { signInEmailPassword, isLoading, isError, error } = useSignInEmailPassword();
   const { isAuthenticated } = useAuthenticationStatus();
-  const location = useLocation();
-
-  // Show verification banner if coming from signup
-  useEffect(() => {
-    if (location.state?.fromSignup) {
-      setShowVerificationBanner(true);
-      // Auto-hide after 10 seconds
-      const timer = setTimeout(() => setShowVerificationBanner(false), 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [location]);
 
   // console.log('SignIn Rendered');
   // console.log('isAuthenticated:', isAuthenticated);
@@ -41,7 +29,7 @@ export const SignIn: React.FC = () => {
     e.preventDefault();
     // console.log('SignIn form submitted', { email, password });
     try {
-      await signInEmailPassword(email, password);
+      const result = await signInEmailPassword(email, password);
       // console.log('signInEmailPassword result:', result);
     } catch (err) {
       // console.error('SignIn API error:', err);
@@ -54,36 +42,8 @@ export const SignIn: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-sm space-y-4"
+        className="w-full max-w-sm"
       >
-        {/* Verification Banner */}
-        {showVerificationBanner && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="bg-blue-50 border border-blue-200 rounded-lg p-3"
-          >
-            <div className="flex items-start space-x-2">
-              <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-              <div className="text-sm">
-                <p className="text-blue-800 font-medium">Email verification sent!</p>
-                <p className="text-blue-700 mt-1">
-                  Check your inbox and click the verification link, then return here to sign in.
-                </p>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowVerificationBanner(false)}
-                className="ml-auto h-6 w-6 p-0 text-blue-600 hover:text-blue-800"
-              >
-                ×
-              </Button>
-            </div>
-          </motion.div>
-        )}
-
         <Card className="shadow-xl">
           <CardHeader className="text-center pb-4">
             <div className="inline-flex items-center justify-center w-12 h-12 bg-accent rounded-xl mb-3 mx-auto">
@@ -146,14 +106,7 @@ export const SignIn: React.FC = () => {
                   animate={{ opacity: 1, height: 'auto' }}
                   className="bg-destructive/10 border border-destructive/20 rounded-lg p-2.5"
                 >
-                  <p className="text-destructive text-sm">
-                    {error?.message || 'Sign in failed'}
-                  </p>
-                  {error?.message?.includes('email') && (
-                    <p className="text-destructive text-xs mt-1">
-                      💡 Haven't verified your email yet? Check your inbox for the verification link.
-                    </p>
-                  )}
+                  <p className="text-destructive text-sm">{error?.message || 'Sign in failed'}</p>
                 </motion.div>
               )}
 
